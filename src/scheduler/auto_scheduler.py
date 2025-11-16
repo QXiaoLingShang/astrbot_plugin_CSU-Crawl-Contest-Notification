@@ -153,7 +153,6 @@ class AutoScheduler:
             if not image_url:
                 logger.error("生成报告失败，跳过推送")
                 return
-            
 
             for group_id in enabled_groups:
                 try:
@@ -170,6 +169,15 @@ class AutoScheduler:
                             {"type": "image", "data": {"url": image_url}}
                             ]
                         )
+                    # 同时补充新通知的链接
+                    for notice in new_notices:
+                        await bot_instance.api.call_action(
+                            action="send_group_msg",
+                            group_id=group_id,
+                            message=[
+                                {"type": "text", "data": {"text": notice["标题"] + ": " + notice["链接"]}}
+                                ]
+                            )
 
                 except Exception as e:
                     logger.error(f"发送通知到群聊 {group_id} 失败: {str(e)}")

@@ -32,7 +32,7 @@
     "description": "本地存储路径",
     "type": "string",
     "hint": "本地存储路径",
-    "default": "./data/plugins/CSU-Crawl-Contest-Notification/data/csu_innovation_notices.csv"
+    "default": "./data/plugins_data/CSU-Crawl-Contest-Notification/data/csu_innovation_notices.csv"
   },
   "base_url": {
     "description": "基础URL",

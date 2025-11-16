@@ -130,8 +130,12 @@ class MyPlugin(Star):
 
                 # 3. 生成new_notices的报告图片
                 image_url = await self.report_generator.generate_new_image_report(self.html_render, new_notices)
+
                 if image_url:
                     yield event.image_result(image_url)
+                    yield event.plain_result(f"新增通知链接：")
+                    for notice in new_notices:
+                        yield event.plain_result(notice["标题"] + ": " + notice["链接"])
                 else:
                     yield event.plain_result("❌ 报告图片生成失败")
             
@@ -142,7 +146,7 @@ class MyPlugin(Star):
             logger.error(f"更新通知时出错: {str(e)}")
             yield event.plain_result("❌ 更新通知时出错，请稍后重试")
 
-            
+
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
         # 关闭自动调度器

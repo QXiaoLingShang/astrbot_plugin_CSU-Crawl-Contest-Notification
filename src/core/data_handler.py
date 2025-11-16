@@ -15,9 +15,9 @@ class NoticeDataHandler:
     """中南大学通知数据处理工具类"""
     
     def __init__(self, storage_path: str, base_url: str = "https://bksy.csu.edu.cn"):
-        self.storage_path = storage_path  # 本地存储文件路径
-        self.base_url = base_url  # 用于补全相对链接的基础URL
-        self._init_storage()  # 初始化存储目录
+        self.storage_path = storage_path        # 本地存储文件路径
+        self.base_url = base_url                # 用于补全相对链接的基础URL
+        self._init_storage()                    # 初始化存储目录
 
     def _init_storage(self):
         """初始化存储目录（如果不存在则创建）"""
@@ -110,7 +110,9 @@ class NoticeDataHandler:
 
         logger.info(f"已保存 {len(filtered_notices)} 条新通知到 {self.storage_path}")
 
-
+        # 对Csv文件进行排序
+        self.sort_notices_by_time()
+        
         return filtered_notices
 
     def _get_existing_links(self) -> set:
@@ -139,8 +141,8 @@ class NoticeDataHandler:
                 reader = csv.DictReader(f)
                 rows = list(reader)
             
-            # 按时间字段排序（假设时间字段名为"时间"）
-            rows.sort(key=lambda x: datetime.strptime(x["时间"], "%Y-%m-%d"))
+            # 按时间字段排序，新的在前面
+            rows.sort(key=lambda x: datetime.strptime(x["时间"], "%Y-%m-%d"), reverse=True)
             
             # 写回文件
             with open(self.storage_path, "w", encoding="UTF-8", newline="") as f:
@@ -148,6 +150,7 @@ class NoticeDataHandler:
                 writer.writeheader()
                 writer.writerows(rows)
             
+
             logger.info(f"已按时间排序 {len(rows)} 条通知")
         except Exception as e:
             logger.error(f"排序本地通知失败: {str(e)}")
