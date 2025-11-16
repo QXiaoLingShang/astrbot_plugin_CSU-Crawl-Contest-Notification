@@ -120,56 +120,64 @@ class AutoScheduler:
 
     async def _push_notices(self):
         """推送通知 - 通知所有群聊"""
-        logger.info("开始推送通知")
+        try:
+            logger.info("开始推送通知")
 
-        enabled_groups = self.bot_manager.get_enabled_groups()
-        if not enabled_groups:
-            logger.warning("没有启用的群聊，跳过推送")
-            return
-        
-        logger.info(f"将通知 {len(enabled_groups)} 个群聊: {enabled_groups}")
+            enabled_groups = self.bot_manager.get_enabled_groups()
+            if not enabled_groups:
+                logger.warning("没有启用的群聊，跳过推送")
+                return
+            
+            logger.info(f"将通知 {len(enabled_groups)} 个群聊: {enabled_groups}")
 
-        # 1.从url获取内容
-        html_content = await self.html_render_func()
-        if not html_content:
-            logger.error("获取HTML内容失败，跳过推送")
-            return
-        
-        # 2.解析，写入本地
-        notices = self.NoticeDataHandler.parse_notices(html_content)
-        if not notices:
-            logger.error("解析通知失败，跳过推送")
-            return
-        new_notices = self.NoticeDataHandler.save_notices(notices)
-        if not new_notices:
-            logger.info("没有新的通知，跳过推送")
-            return
-        
-        # 3.生成新增通知的报告
-        image_url = await self.ReportGenerator.generate_report(new_notices)
-        if not image_url:
-            logger.error("生成报告失败，跳过推送")
-            return
-        
+            # 1.从url获取内容
+            html_content = await self.html_render_func()
+            if not html_content:
+                logger.error("获取HTML内容失败，跳过推送")
+                return
+            
+            # 2.解析，写入本地
+            notices = self.NoticeDataHandler.parse_notices(html_content)
+            if not notices:
+                logger.error("解析通知失败，跳过推送")
+                return
+            new_notices = self.NoticeDataHandler.save_notices(notices)
+            if not new_notices:
+                logger.info("没有新的通知，跳过推送")
+                return
+            
+            # 3.生成新增通知的报告
+            image_url = await self.ReportGenerator.generate_report(new_notices)
+            if not image_url:
+                logger.error("生成报告失败，跳过推送")
+                return
+            
 
-        for group_id in enabled_groups:
-            try:
-                bot_instance = self.bot_manager.get_bot_instance()
-                if not bot_instance:
-                    logger.error("获取机器人实例失败，跳过推送")
-                    return
-                
+            for group_id in enabled_groups:
+                try:
+                    bot_instance = self.bot_manager.get_bot_instance()
+                    if not bot_instance:
+                        logger.error("获取机器人实例失败，跳过推送")
+                        return
+                    
 
-                await bot_instance.api.call_action(
-                    action="send_group_msg",
-                    group_id=group_id,
-                    message=[
-                        {"type": "image", "data": {"url": image_url}}
-                        ]
-                    )
+                    await bot_instance.api.call_action(
+                        action="send_group_msg",
+                        group_id=group_id,
+                        message=[
+                            {"type": "image", "data": {"url": image_url}}
+                            ]
+                        )
 
-            except Exception as e:
-                logger.error(f"发送通知到群聊 {group_id} 失败: {str(e)}")
+                except Exception as e:
+                    logger.error(f"发送通知到群聊 {group_id} 失败: {str(e)}")
+                    continue
+
+        except Exception as e:
+            logger.error(f"推送通知时出错: {str(e)}")
+            return
+
+
 
     # 接口
     def set_mode(self, mode: str):
