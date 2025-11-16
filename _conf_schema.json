@@ -1,0 +1,36 @@
+{
+  "url": {
+    "description": "URl",
+    "type": "string",
+    "hint": "爬取的目标网站",
+    "default": "https://bksy.csu.edu.cn/tztg/cxycyjybgs.htm",
+    "obvious_hint": true
+  },
+  "push_time": {
+    "description": "推送时间",
+    "type": "string",
+    "hint": "推送时间，格式为 HH:mm",
+    "default": "10:00",
+    "obvious_hint": true
+  },
+  "storage_file": {
+    "description": "本地存储路径",
+    "type": "string",
+    "hint": "本地存储路径",
+    "default": "./data/plugins/CSU-Crawl-Contest-Notification/data/csu_innovation_notices.csv"
+  },
+  "base_url": {
+    "description": "基础URL",
+    "type": "string",
+    "hint": "基础URL",
+    "default": "https://bksy.csu.edu.cn",
+    "obvious_hint": true
+  },
+  "bot_qq_id": {
+    "description": "机器人的qqID",
+    "type": "string",
+    "hint": "机器人的qqID",
+    "default": "",
+    "obvious_hint": true
+  }
+}
