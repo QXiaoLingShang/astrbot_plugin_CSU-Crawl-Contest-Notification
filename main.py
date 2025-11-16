@@ -82,7 +82,7 @@ class MyPlugin(Star):
 
 
     # 配置
-    @filter.command("CSU通知配置")
+    @filter.command("CSU通知配置", alias={"csu通知配置", "Csu通知配置"})
     async def config(self, event: AstrMessageEvent):
         # 手动计算距离下次执行时间
         """查看配置"""
@@ -94,7 +94,7 @@ class MyPlugin(Star):
         yield event.plain_result(configText)
 
 
-    @filter.command("CSU通知查找")
+    @filter.command("CSU通知查找", alias={"csu通知查找", "Csu通知查找"})
     async def restart(self, event: AstrMessageEvent, page: int = 1, list_len: int = 10):
         """查找本地缓存的通知，格式：CSU通知查找 [页码] [每页数量]
         参数：
@@ -112,7 +112,7 @@ class MyPlugin(Star):
             logger.error(f"查找通知时出错: {str(e)}")
             yield event.plain_result("❌ 查找通知时出错，请稍后重试")
 
-    @filter.command("CSU通知更新")
+    @filter.command("CSU通知更新", alias={"csu通知更新", "Csu通知更新"})
     async def update(self, event: AstrMessageEvent):
         """更新本地存储的通知"""
         try:
