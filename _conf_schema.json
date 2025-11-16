@@ -24,7 +24,7 @@
   "push_interval": {
     "description": "推送时间间隔（启用interval模式时生效）",
     "type": "int",
-    "hint": "推送时间间隔，单位为分钟",
+    "hint": "推送时间间隔，单位为秒",
     "default": 60,
     "obvious_hint": true
   },

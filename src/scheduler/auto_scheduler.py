@@ -88,7 +88,7 @@ class AutoScheduler:
 
                 elif self.mode == "interval":
                     target_time = now + timedelta(
-                        minutes=self.config_manager.get_push_interval()
+                        seconds=self.config_manager.get_push_interval()
                     )
 
                 else:
@@ -131,7 +131,7 @@ class AutoScheduler:
             logger.info(f"将通知 {len(enabled_groups)} 个群聊: {enabled_groups}")
 
             # 1.从url获取内容
-            html_content = await self.html_render_func()
+            html_content = self.NoticeDataHandler.fetch_url_content(self.config_manager.get_url())
             if not html_content:
                 logger.error("获取HTML内容失败，跳过推送")
                 return
@@ -147,7 +147,7 @@ class AutoScheduler:
                 return
             
             # 3.生成新增通知的报告
-            image_url = await self.ReportGenerator.generate_report(new_notices)
+            image_url = await self.ReportGenerator.generate_new_image_report(self.html_render_func, new_notices)
             if not image_url:
                 logger.error("生成报告失败，跳过推送")
                 return

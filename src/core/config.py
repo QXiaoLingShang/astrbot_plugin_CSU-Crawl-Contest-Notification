@@ -46,3 +46,7 @@ class ConfigManager:
     def get_push_interval(self) -> int:
         """获取时间间隔"""
         return self.config.get("push_interval", 60)
+    
+    def get_enabled_groups(self) -> list:
+        """获取启用的群聊"""
+        return self.config.get("enabled_groups", [])
