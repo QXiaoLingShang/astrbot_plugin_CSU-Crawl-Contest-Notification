@@ -78,17 +78,13 @@ class NoticeDataHandler:
         logger.info(f"成功解析 {len(notices)} 条通知数据")
         return notices
 
-    def save_notices(self, new_notices: list, ret_mode: str = "num") -> int | list[dict]:
+    def save_notices(self, new_notices: list) -> list[dict]:
         """
-        将新通知追加到本地CSV，自动去重，返回新增数量或新增通知列表
-        参数:
-            new_notices (list): 新通知数据列表，每个元素为字典格式
-            ret_mode (str): 返回模式，"num"返回新增数量，"list"返回新增通知列表
-        返回:
-            int | list: 根据ret_mode返回新增数量或新增通知列表
+        写入通知到本地
+        返回新增通知列表
         """
         if not new_notices:
-            return 0 if ret_mode == "num" else []
+            return []
 
         # 获取已存在的链接（用于去重）
         existing_links = self._get_existing_links()
@@ -99,7 +95,9 @@ class NoticeDataHandler:
         ]
         if not filtered_notices:
             logger.info("没有新通知需要保存")
-            return 0 if ret_mode == "num" else []
+            return []
+
+
 
         # 追加写入CSV
         with open(self.storage_path, "a", encoding="UTF-8", newline="") as f:
@@ -111,7 +109,7 @@ class NoticeDataHandler:
             writer.writerows(filtered_notices)
 
         logger.info(f"已保存 {len(filtered_notices)} 条新通知到 {self.storage_path}")
-        return len(filtered_notices) if ret_mode == "num" else filtered_notices
+        return filtered_notices
 
     def _get_existing_links(self) -> set:
         """获取本地已存储的所有通知链接（用于去重）"""

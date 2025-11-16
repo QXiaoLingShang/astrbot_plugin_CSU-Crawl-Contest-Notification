@@ -6,11 +6,26 @@
     "default": "https://bksy.csu.edu.cn/tztg/cxycyjybgs.htm",
     "obvious_hint": true
   },
+  "mode": {
+    "description": "调度模式",
+    "type": "string",
+    "hint": "调度模式，可选值为 daily（每日固定时间） 或 interval（固定时间间隔）",
+    "default": "daily",
+    "options": ["daily", "interval"],
+    "obvious_hint": true
+  },
   "push_time": {
-    "description": "推送时间",
+    "description": "推送时间（启用daily模式时生效）",
     "type": "string",
     "hint": "推送时间，格式为 HH:mm",
     "default": "10:00",
+    "obvious_hint": true
+  },
+  "push_interval": {
+    "description": "推送时间间隔（启用interval模式时生效）",
+    "type": "int",
+    "hint": "推送时间间隔，单位为分钟",
+    "default": 60,
     "obvious_hint": true
   },
   "storage_file": {
@@ -32,5 +47,14 @@
     "hint": "机器人的qqID",
     "default": "",
     "obvious_hint": true
+  },
+  "enabled_groups": {
+    "type": "list",
+    "description": "启用推送的的QQ群列表",
+    "default": [],
+    "hint": "填入允许使用推送功能的QQ群号",
+    "items": {
+      "type": "string"
+    }
   }
 }

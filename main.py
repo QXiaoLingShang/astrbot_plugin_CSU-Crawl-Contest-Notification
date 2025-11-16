@@ -63,8 +63,8 @@ class MyPlugin(Star):
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
-
-
+        # 启动自动调度器
+        await self.auto_scheduler.start_scheduler()
 
 
 
@@ -111,7 +111,7 @@ class MyPlugin(Star):
 
             # 2. 解析并保存通知
             notices = self.data_handler.parse_notices(html_content)
-            new_notices = self.data_handler.save_notices(notices, ret_mode="list")
+            new_notices = self.data_handler.save_notices(notices)
             if isinstance(new_notices, list) and len(new_notices) > 0:
                 yield event.plain_result(f"✅ 已保存 {len(new_notices)} 条新通知到本地")    
 
@@ -155,3 +155,5 @@ class MyPlugin(Star):
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
+        # 关闭自动调度器
+        await self.auto_scheduler.stop_scheduler()

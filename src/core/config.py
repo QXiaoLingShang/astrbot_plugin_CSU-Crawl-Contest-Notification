@@ -38,3 +38,11 @@ class ConfigManager:
     def get_bot_qq_id(self) -> str:
         """获取机器人的qqID"""
         return self.config.get("bot_qq_id", "")
+    
+    def get_mode(self) -> str:
+        """获取调度模式"""
+        return self.config.get("mode", "daily")
+    
+    def get_push_interval(self) -> int:
+        """获取时间间隔"""
+        return self.config.get("push_interval", 60)
