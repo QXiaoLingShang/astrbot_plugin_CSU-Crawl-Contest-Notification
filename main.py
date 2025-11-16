@@ -48,24 +48,24 @@ class MyPlugin(Star):
         )
 
 
+    async def initialize(self):
+        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
+        # 启动自动调度器
+        await self.auto_scheduler.start_scheduler()
+        await self.bot_manager.initialize_from_config()
+
+
         # 预处理
         # 事先爬取https://bksy.csu.edu.cn/tztg/cxycyjybgs/xx.htm里所有通知，xx为1~18
         # 若本地存储的数量过少，爬取所有通知
         if len(self.data_handler._get_existing_links()) < 250:
             logger.info("本地存储的通知数量过少，开始爬取所有通知")
             for page in range(1, 19):
-                test_content = self.data_handler.fetch_url_content(f"https://bksy.csu.edu.cn/tztg/cxycyjybgs/{page}.htm")
+                test_content = await self.data_handler.fetch_url_content(f"https://bksy.csu.edu.cn/tztg/cxycyjybgs/{page}.htm")
                 # 写入
                 notices = self.data_handler.parse_notices(test_content)
                 new_count = self.data_handler.save_notices(notices)
                 logger.info(f"写入了{new_count}条新通知")
-
-
-    async def initialize(self):
-        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
-        # 启动自动调度器
-        await self.auto_scheduler.start_scheduler()
-        await self.bot_manager.initialize_from_config()
 
 
 
@@ -117,7 +117,7 @@ class MyPlugin(Star):
         """更新本地存储的通知"""
         try:
             # 1. 从URL获取内容
-            html_content = self.data_handler.fetch_url_content(self.config_manager.get_url())
+            html_content = await self.data_handler.fetch_url_content(self.config_manager.get_url())
             if not html_content:
                 yield event.plain_result("❌ 无法获取URL内容，请检查链接是否有效")
                 return
@@ -133,9 +133,12 @@ class MyPlugin(Star):
 
                 if image_url:
                     yield event.image_result(image_url)
-                    yield event.plain_result(f"新增通知链接：")
+                    # 合成通知链接
+                    notice_link = ""
                     for notice in new_notices:
-                        yield event.plain_result(notice["标题"] + ": " + notice["链接"])
+                        notice_link += notice["标题"] + ": " + notice["链接"] + "\n"
+
+                    yield event.plain_result(f"新增通知链接：\n{notice_link}")
                 else:
                     yield event.plain_result("❌ 报告图片生成失败")
             

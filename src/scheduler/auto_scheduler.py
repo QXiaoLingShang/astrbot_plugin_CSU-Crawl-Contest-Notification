@@ -133,7 +133,7 @@ class AutoScheduler:
             logger.info(f"将通知 {len(enabled_groups)} 个群聊: {enabled_groups}")
 
             # 1.从url获取内容
-            html_content = self.NoticeDataHandler.fetch_url_content(self.config_manager.get_url())
+            html_content = await self.NoticeDataHandler.fetch_url_content(self.config_manager.get_url())
             if not html_content:
                 logger.error("获取HTML内容失败，跳过推送")
                 return
@@ -169,15 +169,18 @@ class AutoScheduler:
                             {"type": "image", "data": {"url": image_url}}
                             ]
                         )
-                    # 同时补充新通知的链接
+                    
+                    notice_link = ""
                     for notice in new_notices:
-                        await bot_instance.api.call_action(
-                            action="send_group_msg",
-                            group_id=group_id,
-                            message=[
-                                {"type": "text", "data": {"text": notice["标题"] + ": " + notice["链接"]}}
-                                ]
-                            )
+                        notice_link += notice["标题"] + ": " + notice["链接"] + "\n"
+
+                    await bot_instance.api.call_action(
+                        action="send_group_msg",
+                        group_id=group_id,
+                        message=[
+                            {"type": "text", "data": {"text": f"新增通知链接：\n{notice_link}"}}
+                            ]
+                        )
 
                 except Exception as e:
                     logger.error(f"发送通知到群聊 {group_id} 失败: {str(e)}")

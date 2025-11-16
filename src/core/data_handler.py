@@ -6,7 +6,8 @@
 
 import os
 import csv
-import requests
+# import requests 这种非异步的方式，问题是会阻塞事件循环
+import aiohttp  # 异步HTTP客户端
 from astrbot.api import logger
 from bs4 import BeautifulSoup
 from datetime import datetime   
@@ -26,17 +27,18 @@ class NoticeDataHandler:
             os.makedirs(dir_path, exist_ok=True)
             logger.info(f"创建存储目录: {dir_path}")
 
-    def fetch_url_content(self, target_url: str) -> str:
+    async def fetch_url_content(self, target_url: str) -> str:
         """从目标URL获取页面内容"""
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         try:
-            response = requests.get(target_url, headers=headers, timeout=10)
-            response.raise_for_status()  # 触发HTTP错误
-            response.encoding = "UTF-8"
-            logger.info(f"成功获取URL内容: {target_url}")
-            return response.text
+            async with aiohttp.ClientSession() as session:
+                async with session.get(target_url, headers=headers, timeout=10) as response:
+                    response.raise_for_status()  # 触发HTTP错误
+                    response.encoding = "UTF-8"
+                    logger.info(f"成功获取URL内容: {target_url}")
+                    return await response.text()
         except Exception as e:
             logger.error(f"获取URL内容失败: {str(e)}")
             return ""
