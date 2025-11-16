@@ -123,7 +123,7 @@ class AutoScheduler:
         try:
             logger.info("开始推送通知")
 
-            enabled_groups = self.bot_manager.get_enabled_groups()
+            enabled_groups = self.config_manager.get_enabled_groups()
             if not enabled_groups:
                 logger.warning("没有启用的群聊，跳过推送")
                 return
