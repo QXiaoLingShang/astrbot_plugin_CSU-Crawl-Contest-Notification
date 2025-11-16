@@ -28,6 +28,8 @@ class AutoScheduler:
         self.NoticeDataHandler = NoticeDataHandler
         self.ReportGenerator = ReportGenerator
         self.html_render_func = html_render_func
+
+        self.target_time = None
     
     def _get_platform_id(self):
         """获取平台ID"""
@@ -54,11 +56,9 @@ class AutoScheduler:
         await asyncio.sleep(1)  # 等待1秒，确保配置加载完成
 
 
-        logger.info(
-            f"启动定时任务调度器"
-        )
 
         self.scheduler_task = asyncio.create_task(self._scheduler_loop())
+        logger.info("定时任务调度器已启动")
 
     async def stop_scheduler(self):
         """停止自动调度器"""
@@ -70,6 +70,7 @@ class AutoScheduler:
         """重启定时任务调度器"""
         await self.stop_scheduler()
         await self.start_scheduler()
+        logger.info("定时任务调度器已重启")
 
     async def _scheduler_loop(self):
         """定时任务循环"""
@@ -106,6 +107,7 @@ class AutoScheduler:
                         )
 
                 wait_time = (target_time - now).total_seconds()
+                self.target_time = target_time
                 logger.info(
                     f"推送任务将在 {wait_time:.2f} 秒后，直到 {target_time.strftime('%Y-%m-%d %H:%M:%S')}"
                 )
@@ -188,3 +190,14 @@ class AutoScheduler:
         """
         self.mode = mode
         logger.info(f"设置调度模式为：{mode}")
+
+    def get_next_execution_time(self):
+        """
+        获取下一次执行时间
+        返回：
+        str: 下一次执行时间的字符串表示，格式为 "YYYY-MM-DD HH:MM:SS"
+        """
+        if self.target_time:
+            return self.target_time.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            return "未设置"

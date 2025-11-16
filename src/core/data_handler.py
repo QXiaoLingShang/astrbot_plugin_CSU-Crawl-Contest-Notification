@@ -109,6 +109,8 @@ class NoticeDataHandler:
             writer.writerows(filtered_notices)
 
         logger.info(f"已保存 {len(filtered_notices)} 条新通知到 {self.storage_path}")
+
+
         return filtered_notices
 
     def _get_existing_links(self) -> set:

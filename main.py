@@ -70,41 +70,53 @@ class MyPlugin(Star):
 
 
     # 注册指令的装饰器。
-    @filter.command("helloworld")
-    async def helloworld(self, event: AstrMessageEvent):
-        """这是一个 hello world 指令""" # 这是 handler 的描述，将会被解析方便用户了解插件内容。建议填写。
-        user_name = event.get_sender_name()
-        message_str = event.message_str # 用户发的纯文本消息字符串
-        message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
-        logger.info(message_chain)
-        yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
+    # @filter.command("helloworld")
+    # async def helloworld(self, event: AstrMessageEvent):
+    #     """这是一个 hello world 指令""" # 这是 handler 的描述，将会被解析方便用户了解插件内容。建议填写。
+    #     user_name = event.get_sender_name()
+    #     message_str = event.message_str # 用户发的纯文本消息字符串
+    #     message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
+    #     logger.info(message_chain)
+    #     yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
 
 
 
     # 配置
-    @filter.command("config")
+    @filter.command("CSU通知配置")
     async def config(self, event: AstrMessageEvent):
+        # 手动计算距离下次执行时间
         """查看配置"""
         configText = f"""
         配置信息：
         - 目标URL: {self.config_manager.get_url()}
-        - 推送时间: {self.config_manager.get_push_time()}
-        - 本地存储路径: {self.config_manager.get_storage_file()}
+        - 下次自动更新时间: {self.auto_scheduler.get_next_execution_time()}
         """
         yield event.plain_result(configText)
 
 
+    @filter.command("CSU通知查找")
+    async def restart(self, event: AstrMessageEvent, page: int = 1, list_len: int = 10):
+        """查找本地缓存的通知，格式：CSU通知查找 [页码] [每页数量]
+        参数：
+        - page: 要查找的页码，默认第1页
+        - list_len: 每页显示的通知数量，默认10条
+        """
+        try:
+            image_url = await self.report_generator.generate_image_report(self.html_render, page, list_len)
+            if image_url:
+                yield event.image_result(image_url)
+            else:
+                yield event.plain_result("❌ 报告图片生成失败")
 
+        except Exception as e:
+            logger.error(f"查找通知时出错: {str(e)}")
+            yield event.plain_result("❌ 查找通知时出错，请稍后重试")
 
-
-
-    # 测试指令：爬取通知并发送前10条
-    @filter.command("test")
-    async def test_command(self, event: AstrMessageEvent, page: int = 1, list_len: int = 10):
-        """测试指令：爬取通知并发送前10条"""
+    @filter.command("CSU通知更新")
+    async def update(self, event: AstrMessageEvent):
+        """更新本地存储的通知"""
         try:
             # 1. 从URL获取内容
-            yield event.plain_result(f"开始从配置URL第{page}页爬取通知...")
             html_content = self.data_handler.fetch_url_content(self.config_manager.get_url())
             if not html_content:
                 yield event.plain_result("❌ 无法获取URL内容，请检查链接是否有效")
@@ -113,7 +125,7 @@ class MyPlugin(Star):
             # 2. 解析并保存通知
             notices = self.data_handler.parse_notices(html_content)
             new_notices = self.data_handler.save_notices(notices)
-            if isinstance(new_notices, list) and len(new_notices) > 0:
+            if len(new_notices) > 0:
                 yield event.plain_result(f"✅ 已保存 {len(new_notices)} 条新通知到本地")    
 
                 # 3. 生成new_notices的报告图片
@@ -122,38 +134,15 @@ class MyPlugin(Star):
                     yield event.image_result(image_url)
                 else:
                     yield event.plain_result("❌ 报告图片生成失败")
-
-
-
-            # # 3. 读取本地第page页前list_len条通知并发送
-            # yield event.plain_result(f"读取本地第{page}页前{list_len}条通知...")
-            # top_notices = self.data_handler.read_notices(list_len, page)
-            # if not top_notices:
-            #     yield event.plain_result(f"⚠️ 本地第{page}页暂无通知数据")
-            #     return
-
-            # # 格式化消息
-            # message = f"本地存储的第{page}页前{list_len}条通知：\n\n"
-            # for i, notice in enumerate(top_notices, 1):
-            #     message += f"{i}. 时间：{notice['时间']}\n"
-            #     message += f"   标题：{notice['标题']}\n"
-            #     message += f"   链接：{notice['链接']}\n\n"
             
-            # yield event.plain_result(message.strip())
-
-            # 生成报告
-            yield event.plain_result("生成报告...")
-            image_url = await self.report_generator.generate_image_report(self.html_render, page, list_len)
-            if image_url:
-                yield event.image_result(image_url)
             else:
-                yield event.plain_result("❌ 报告图片生成失败")
+                yield event.plain_result("❌ 没有新通知")
 
         except Exception as e:
-            logger.error(f"测试指令执行失败: {str(e)}")
-            yield event.plain_result(f"❌ 操作失败：{str(e)}")
+            logger.error(f"更新通知时出错: {str(e)}")
+            yield event.plain_result("❌ 更新通知时出错，请稍后重试")
 
-
+            
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
         # 关闭自动调度器
