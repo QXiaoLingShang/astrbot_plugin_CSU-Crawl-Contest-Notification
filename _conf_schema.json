@@ -28,11 +28,11 @@
     "default": 60,
     "obvious_hint": true
   },
-  "storage_file": {
-    "description": "本地存储路径",
+  "storage_root": {
+    "description": "本地存储根目录",
     "type": "string",
-    "hint": "本地存储路径",
-    "default": "./data/plugins_data/CSU-Crawl-Contest-Notification/data/csu_innovation_notices.csv"
+    "hint": "本地存储根目录，用于存储爬取到的通知数据",
+    "default": "./data/plugins_data/CSU-Crawl-Contest-Notification/data/"
   },
   "base_url": {
     "description": "基础URL",

@@ -11,14 +11,15 @@ import aiohttp  # 异步HTTP客户端
 from astrbot.api import logger
 from bs4 import BeautifulSoup
 from datetime import datetime   
+from ..core import ConfigManager
 
 class NoticeDataHandler:
     """中南大学通知数据处理工具类"""
     
-    def __init__(self, storage_path: str, base_url: str = "https://bksy.csu.edu.cn"):
-        self.storage_path = storage_path        # 本地存储文件路径
-        self.base_url = base_url                # 用于补全相对链接的基础URL
-        self._init_storage()                    # 初始化存储目录
+    def __init__(self, config: ConfigManager):
+        self.storage_path = config.get_storage_root() + "csu_innovation_notices.csv"   # 本地存储文件路径
+        self.base_url = config.get_base_url()                           # 用于补全相对链接的基础URL
+        self._init_storage()                                            # 初始化存储目录
 
     def _init_storage(self):
         """初始化存储目录（如果不存在则创建）"""
@@ -36,7 +37,7 @@ class NoticeDataHandler:
             async with aiohttp.ClientSession() as session:
                 async with session.get(target_url, headers=headers, timeout=10) as response:
                     response.raise_for_status()  # 触发HTTP错误
-                    response.encoding = "UTF-8"
+                    # response.encoding = "UTF-8"
                     logger.info(f"成功获取URL内容: {target_url}")
                     return await response.text()
         except Exception as e:

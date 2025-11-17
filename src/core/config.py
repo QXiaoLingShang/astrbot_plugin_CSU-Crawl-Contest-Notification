@@ -27,9 +27,9 @@ class ConfigManager:
         """获取推送时间"""
         return self.config.get("push_time", "10:00")
     
-    def get_storage_file(self) -> str:
-        """获取本地存储路径"""
-        return self.config.get("storage_file", "./data/csu_innovation_notices.csv")
+    def get_storage_root(self) -> str:
+        """获取本地存储根目录"""
+        return self.config.get("storage_root", "./data/plugins_data/CSU-Crawl-Contest-Notification/data/")
     
     def get_base_url(self) -> str:
         """获取基础URL"""
@@ -50,3 +50,8 @@ class ConfigManager:
     def get_enabled_groups(self) -> list:
         """获取启用的群聊"""
         return self.config.get("enabled_groups", [])
+
+
+    def get_timeout(self) -> int:
+        """获取超时时间（单位秒）"""
+        return self.config.get("timeout", 10)

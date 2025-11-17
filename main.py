@@ -5,7 +5,8 @@ from astrbot.api import AstrBotConfig
 from .src.core import BotManager, ConfigManager, NoticeDataHandler
 from .src.reports import ReportGenerator
 from .src.scheduler import AutoScheduler
-
+from .src.crawlers import ContestCrawler, Contest
+import time
 
 
 @register("helloworld", "Xiao_LingShang", "一个简单的 Hello World 插件", "0.0.1")
@@ -23,15 +24,12 @@ class MyPlugin(Star):
                      机器人的qqID: {self.config_manager.get_bot_qq_id()},
                      基础URL: {self.config_manager.get_base_url()}, 
                      推送时间: {self.config_manager.get_push_time()}, 
-                     本地存储路径: {self.config_manager.get_storage_file()}"
+                     本地存储路径: {self.config_manager.get_storage_root()}
                     """
                      )
 
         # 初始化数据处理工具
-        self.data_handler = NoticeDataHandler(
-            base_url=self.config_manager.get_base_url(),
-            storage_path=self.config_manager.get_storage_file()
-        )
+        self.data_handler = NoticeDataHandler(config=self.config_manager)
 
         # 初始化报告生成器
         self.report_generator = ReportGenerator(self.config_manager)
@@ -46,6 +44,9 @@ class MyPlugin(Star):
             html_render_func=self.html_render,
             bot_manager=self.bot_manager,
         )
+
+        # 初始化比赛爬虫
+        self.contest_crawler = ContestCrawler(self.config_manager)
 
 
     async def initialize(self):
@@ -81,7 +82,7 @@ class MyPlugin(Star):
 
 
 
-    # 配置
+    # 正式指令
     @filter.command("CSU通知配置", alias={"csu通知配置", "Csu通知配置"})
     async def config(self, event: AstrMessageEvent):
         # 手动计算距离下次执行时间
@@ -92,7 +93,6 @@ class MyPlugin(Star):
         - 下次自动更新时间: {self.auto_scheduler.get_next_execution_time()}
         """
         yield event.plain_result(configText)
-
 
     @filter.command("CSU通知查找", alias={"csu通知查找", "Csu通知查找"})
     async def restart(self, event: AstrMessageEvent, page: int = 1, list_len: int = 10):
@@ -149,6 +149,37 @@ class MyPlugin(Star):
             logger.error(f"更新通知时出错: {str(e)}")
             yield event.plain_result("❌ 更新通知时出错，请稍后重试")
 
+    # 测试用
+    @filter.command("测试比赛")
+    async def test_contest(self, event: AstrMessageEvent, day: int = 3, hour: int = 0, minute: int = 0, second = 0):
+        """测试从本地文件读取比赛信息，默认读取3天内的比赛"""
+        await self.contest_crawler.update()
+        try:
+            contests = await self.contest_crawler.read()
+            if contests:
+                yield event.plain_result(f"✅ 成功读取 {len(contests)} 条比赛信息")
+                test = ''
+
+                # 读取关键消息
+                curTime = time.time()
+                for contest in contests:
+                    if contest.stime < curTime + day * 24 * 60 * 60 + hour * 60 * 60 + minute * 60 + second:
+                        
+                        test += f"{contest.name}\n"
+                        test += f"比赛平台：{contest.oj}\n"
+                        test += f"时间范围：{Contest.timestamp_to_time(contest.stime)} ~ {Contest.timestamp_to_time(contest.etime)}\n"
+                        test += f"持续时间：{Contest.dtime_to_time(contest.dtime)}\n"
+                        test += f"链接直达：{contest.link}\n"
+                        test += "------------\n"
+
+
+
+                yield event.plain_result(test)
+            else:
+                yield event.plain_result("❌ 没有比赛信息")
+        except Exception as e:
+            logger.error(f"读取比赛信息时出错: {str(e)}")
+            yield event.plain_result("❌ 读取比赛信息时出错，请稍后重试")
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
