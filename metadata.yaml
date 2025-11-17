@@ -1,6 +1,6 @@
 name: astrbot_plugin_CSU-Crawl-Contest-Notification 
-display_name: 爬取CSU比赛通知
+display_name: 个人用的定时任务插件
 desc: 定时从官网爬取CSU的通知并发送到指定QQ群聊。
-version: v1.0.1
+version: v1.0.2
 author: Xiao_LingShang
 repo: https://github.com/Xiao-LingShang/CSU-Crawl-Contest-Notification
