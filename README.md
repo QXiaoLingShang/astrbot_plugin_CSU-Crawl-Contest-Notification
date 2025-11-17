@@ -17,6 +17,17 @@
 
 - [ ] 定时推送各种编程比赛
 
+## 更新日志
+
+<details>
+<summary>📋 点击展开查看完整更新日志</summary>
+
+
+### v1.0.2
+- 添加了爬取各种算法比赛通知的功能
+  - 使用指令：测试比赛 \[days\] \[hours\] \[minutes\] \[seconds\]
+  - 自动返回days、hours、minutes、seconds内的所有比赛通知（默认3天）
+  - 平台包括：Codeforces、LuoGu、AtCoder、NowCode、LeetCode等
 
 ## 数据来源
 
