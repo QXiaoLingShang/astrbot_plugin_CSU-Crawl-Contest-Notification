@@ -9,7 +9,7 @@ from astrbot.api import AstrBotConfig, logger
 
 class ConfigManager:
     """
-    配置管理类
+    WebUI的配置管理类
     """
 
 
@@ -51,7 +51,14 @@ class ConfigManager:
         """获取启用的群聊"""
         return self.config.get("enabled_groups", [])
 
-
     def get_timeout(self) -> int:
         """获取超时时间（单位秒）"""
         return self.config.get("timeout", 10)
+    
+    def get_group_settings(self) -> dict:
+        """获取指定群组的配置"""
+        return self.config.get(f"group_settings", {})
+    
+
+
+

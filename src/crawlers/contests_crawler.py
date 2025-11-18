@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from html import unescape
 
 # 第三方库导入
+import asyncio
 import aiohttp
 import aiofiles
 from bs4 import BeautifulSoup

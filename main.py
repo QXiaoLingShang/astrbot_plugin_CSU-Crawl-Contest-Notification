@@ -2,14 +2,15 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.api import AstrBotConfig
-from .src.core import BotManager, ConfigManager, NoticeDataHandler
+from .src.core import BotManager, ConfigManager, NoticeDataHandler, CommandHelper
 from .src.reports import ReportGenerator
 from .src.scheduler import AutoScheduler
 from .src.crawlers import ContestCrawler, Contest
+from .src.config import GroupConfigManager
 import time
 
 
-@register("helloworld", "Xiao_LingShang", "一个简单的 Hello World 插件", "0.0.1")
+@register("CSU-Crawl-Contest-Notification", "Xiao_LingShang", "个人用的定时任务插件", "1.0.3")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
@@ -34,7 +35,13 @@ class MyPlugin(Star):
         # 初始化报告生成器
         self.report_generator = ReportGenerator(self.config_manager)
 
-        # 
+        # 初始化命令辅助类
+        # 初始化群组配置管理器
+        self.group_config_manager = GroupConfigManager(self.config_manager, self.context)
+
+        self.command_helper = CommandHelper(self.config_manager, self.context, self.group_config_manager)
+
+        # 初始化机器人管理器
         self.bot_manager = BotManager(self.config_manager)
         self.bot_manager.set_context(context)
         self.auto_scheduler = AutoScheduler(
